@@ -38,7 +38,7 @@ if st.session_state.role is None:
 elif st.session_state.step <= NUM_Q:
     n = st.session_state.step
 
-    # Generate question if needed
+    # create question if needed
     if len(st.session_state.qa) < n:
         try:
             q = openai.ChatCompletion.create(
@@ -49,37 +49,38 @@ elif st.session_state.step <= NUM_Q:
         except Exception as e:
             st.error(f"⚠️ OpenAI error: {e}")
             st.stop()
-
         st.session_state.qa.append([q, None, None])
+        st.experimental_rerun()  # <--- force rerun after appending, so qa[n-1] is always safe
 
     # Only access qa[n-1] if it exists!
-    if len(st.session_state.qa) >= n:
-        q = st.session_state.qa[n-1][0]
-        st.subheader(f"Question {n}/{NUM_Q}")
-        st.write(q)
-        ans = st.text_area("Your answer", key=f"ans{n}")
+    if len(st.session_state.qa) < n:
+        st.stop()  # Abort this run if the list isn't ready, avoid any IndexError
 
-        if st.button("Submit", key=f"btn{n}") and ans.strip():
-            try:
-                fb_raw = openai.ChatCompletion.create(
-                    model=MODEL,
-                    messages=[{"role": "system",
-                               "content": PROMPT_FB.format(q=q, a=ans)}]
-                ).choices[0].message.content
-                fb = json.loads(fb_raw)
-            except Exception as e:
-                st.error(f"⚠️ OpenAI error: {e}")
-                st.stop()
+    q = st.session_state.qa[n-1][0]
+    st.subheader(f"Question {n}/{NUM_Q}")
+    st.write(q)
+    ans = st.text_area("Your answer", key=f"ans{n}")
 
-            st.session_state.qa[n-1][1:] = [ans, fb]
-            st.session_state.step += 1
-            st.experimental_rerun()
+    if st.button("Submit", key=f"btn{n}") and ans.strip():
+        try:
+            fb_raw = openai.ChatCompletion.create(
+                model=MODEL,
+                messages=[{"role": "system",
+                           "content": PROMPT_FB.format(q=q, a=ans)}]
+            ).choices[0].message.content
+            fb = json.loads(fb_raw)
+        except Exception as e:
+            st.error(f"⚠️ OpenAI error: {e}")
+            st.stop()
+        st.session_state.qa[n-1][1:] = [ans, fb]
+        st.session_state.step += 1
+        st.experimental_rerun()
 
-        if st.session_state.qa[n-1][2]:
-            fb = st.session_state.qa[n-1][2]
-            st.success(f"Score: {fb['score']} / 5")
-            for t in fb["tips"]:
-                st.write("•", t)
+    if st.session_state.qa[n-1][2]:
+        fb = st.session_state.qa[n-1][2]
+        st.success(f"Score: {fb['score']} / 5")
+        for t in fb["tips"]:
+            st.write("•", t)
 # ── SUMMARY ──────────────────────────────────────────
 else:
     st.header("Session summary")
