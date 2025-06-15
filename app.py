@@ -53,6 +53,7 @@ elif st.session_state.step <= NUM_Q:
         st.session_state.qa.append([q, None, None])
 
 if len(st.session_state.qa) >= n:
+    # ... code using qa[n-1] ...
     # show question & answer box
     q = st.session_state.qa[n-1][0]
     st.subheader(f"Question {n}/{NUM_Q}")
