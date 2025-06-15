@@ -59,5 +59,38 @@ elif st.session_state.step <= NUM_Q:
         st.write(q)
         ans = st.text_area("Your answer", key=f"ans{n}")
 
-        if st.button("Submit", key=f
-
+        if st.button("Submit", key=f"btn{n}") and ans.strip():
+            try:
+                fb_raw = openai.ChatCompletion.create(
+                    model=MODEL,
+                    messages=[{"role": "system",
+                               "content": PROMPT_FB.format(q=q, a=ans)}]
+                ).choices[0].message.content
+                fb = json.loads(fb_raw)
+            except Exception as e:
+                st.error(f"⚠️ OpenAI error: {e}")
+                st.stop()
+
+            st.session_state.qa[n-1][1:] = [ans, fb]
+            st.session_state.step += 1
+            st.experimental_rerun()
+
+        # show feedback if already answered
+        if st.session_state.qa[n-1][2]:
+            fb = st.session_state.qa[n-1][2]
+            st.success(f"Score: {fb['score']} / 5")
+            for t in fb["tips"]:
+                st.write("•", t)
+
+# ── SUMMARY ──────────────────────────────────────────
+else:
+    st.header("Session summary")
+    avg = sum(item[2]["score"] for item in st.session_state.qa) / NUM_Q
+    st.write(f"Average score: **{avg:.1f} / 5**")
+    for i, (q, a, fb) in enumerate(st.session_state.qa, start=1):
+        st.write(f"**Q{i}:** {q}")
+        st.write(f"_Your answer:_ {a}")
+        st.write(f"Score {fb['score']} — Tips: {', '.join(fb['tips'])}")
+        st.markdown("---")
+    if st.button("Start over"):
+        st.session_state.clear()
