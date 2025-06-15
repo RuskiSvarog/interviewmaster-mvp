@@ -1,6 +1,6 @@
 import streamlit as st, openai, json
 
-# ── CONFIG ───────────────────────────────────────────
+# ── CONFIG ───────────────────────────────
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 MODEL   = "gpt-3.5-turbo"
 ROLES   = ["Retail", "Fast-food", "Warehouse", "Office / Admin"]
@@ -21,24 +21,23 @@ QUESTION: "{q}"
 ANSWER: "{a}"
 """
 
-# ── SESSION STATE ────────────────────────────────────
+# ── SESSION ──────────────────────────────
 if "step" not in st.session_state:
     st.session_state.update(step=0, role=None, qa=[])
 
 st.title("InterviewMasterAI — Text Demo")
 
-# ── SELECT ROLE ──────────────────────────────────────
+# ── SELECT ROLE ──────────────────────────
 if st.session_state.role is None:
     st.session_state.role = st.selectbox("Choose a job type", [""] + ROLES)
     if st.session_state.role:
         st.session_state.step = 1
         st.experimental_rerun()
 
-# ── Q&A LOOP ─────────────────────────────────────────
+# ── Q&A LOOP ─────────────────────────────
 elif st.session_state.step <= NUM_Q:
     n = st.session_state.step
 
-    # create question if needed
     if len(st.session_state.qa) < n:
         try:
             q = openai.ChatCompletion.create(
@@ -49,15 +48,10 @@ elif st.session_state.step <= NUM_Q:
         except Exception as e:
             st.error(f"⚠️ OpenAI error: {e}")
             st.stop()
+
         st.session_state.qa.append([q, None, None])
-        st.experimental_rerun()  # <--- force rerun after appending so qa[n-1] is always safe
 
-    # Defensive: stop script if list not populated
-    if len(st.session_state.qa) < n:
-        st.stop()
-
-    # Now it's safe to access qa[n-1]
-    q = st.session_state.qa[n-1][1]
+    q = st.session_state.qa[n-1][0]
     st.subheader(f"Question {n}/{NUM_Q}")
     st.write(q)
     ans = st.text_area("Your answer", key=f"ans{n}")
@@ -73,6 +67,7 @@ elif st.session_state.step <= NUM_Q:
         except Exception as e:
             st.error(f"⚠️ OpenAI error: {e}")
             st.stop()
+
         st.session_state.qa[n-1][1:] = [ans, fb]
         st.session_state.step += 1
         st.experimental_rerun()
@@ -82,7 +77,8 @@ elif st.session_state.step <= NUM_Q:
         st.success(f"Score: {fb['score']} / 5")
         for t in fb["tips"]:
             st.write("•", t)
-# ── SUMMARY ──────────────────────────────────────────
+
+# ── SUMMARY ─────────────────────────────
 else:
     st.header("Session summary")
     avg = sum(item[2]["score"] for item in st.session_state.qa) / NUM_Q
