@@ -57,7 +57,7 @@ elif st.session_state.step <= NUM_Q:
         st.stop()
 
     # Now it's safe to access qa[n-1]
-    q = st.session_state.qa[n-1][0]
+    q = st.session_state.qa[n-1][1]
     st.subheader(f"Question {n}/{NUM_Q}")
     st.write(q)
     ans = st.text_area("Your answer", key=f"ans{n}")
