@@ -34,22 +34,20 @@ if st.session_state.role is None:
 # ---------- Q&A LOOP ----------
 elif st.session_state.step <= NUM_Q:
     n = st.session_state.step
-    if len(st.session_state.qa) < n:  # need new Q
-        
-        # --- get a new question ---
- try:
-     q = openai.ChatCompletion.create(
-         model=MODEL,
-         messages=[{
-             "role": "system",
-             "content": PROMPT_Q.format(role=st.session_state.role, n=n)
-         }]
-     ).choices[0].message.content.strip()
- except Exception as e:
-     st.error(f"⚠️ OpenAI error: {e}")
-     st.stop()
+          # --- get a new question ---
+        try:
+            q = openai.ChatCompletion.create(
+                model=MODEL,
+                messages=[{
+                    "role": "system",
+                    "content": PROMPT_Q.format(role=st.session_state.role, n=n)
+                }]
+            ).choices[0].message.content.strip()
+        except Exception as e:
+            st.error(f"⚠️ OpenAI error: {e}")
+            st.stop()
 
- st.session_state.qa.append([q, None, None])
+        st.session_state.qa.append([q, None, None])
 
 
     q = st.session_state.qa[n-1][0]
