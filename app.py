@@ -5,7 +5,8 @@ import openai, os, json
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 ROLES = ["Retail", "Fast-food", "Warehouse", "Office / Admin"]
 NUM_QUESTIONS = 5
-MODEL = "gpt-4o-mini"  # use "gpt-4o" if available
+"MODEL = "gpt-3.5-turbo"
+"  # use "gpt-4o" if available
 
 PROMPT_Q = """
 You are an HR interviewer for an ENTRY-LEVEL {role} position.
