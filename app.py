@@ -51,6 +51,7 @@ elif st.session_state.step <= NUM_Q:
             st.stop()
 
         st.session_state.qa.append([q, None, None])
+
 if len(st.session_state.qa) >= n:
     # show question & answer box
     q = st.session_state.qa[n-1][0]
