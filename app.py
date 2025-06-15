@@ -46,11 +46,8 @@ if st.session_state.role is None:
         st.experimental_rerun()
 
 # ---------- Q&A LOOP ----------
-elif st.session_state.step <= NUM_Q:
-    n = st.session_state.step
-
-    # -- get a new question (with error guard) --
     if len(st.session_state.qa) < n:
+        # --- get a new question
         try:
             q = openai.ChatCompletion.create(
                 model=MODEL,
@@ -65,13 +62,15 @@ elif st.session_state.step <= NUM_Q:
 
         st.session_state.qa.append([q, None, None])
 
-q = st.session_state.qa[n-1][0]
-st.subheader(f"Question {n}/{NUM_Q}")
-st.write(q)
+    # -------- show question & answer box --------
+    q = st.session_state.qa[n - 1][0]
+    st.subheader(f"Question {n}/{NUM_Q}")
+    st.write(q)
 
     ans = st.text_area("Your answer:", key=f"ans{n}")
 
     if st.button("Submit", key=f"btn{n}") and ans.strip():
+        # evaluate answer
         try:
             fb_raw = openai.ChatCompletion.create(
                 model=MODEL,
@@ -85,18 +84,17 @@ st.write(q)
             st.error(f"⚠️ OpenAI error: {e}")
             st.stop()
 
-        st.session_state.qa[n-1][1:] = [ans, fb]
+        st.session_state.qa[n - 1][1:] = [ans, fb]
         st.session_state.step += 1
         st.experimental_rerun()
 
-    # show feedback if already answered
-    if st.session_state.qa[n-1][2]:
-        fb = st.session_state.qa[n-1][2]
+    # show feedback if this question already answered
+    if st.session_state.qa[n - 1][2]:
+        fb = st.session_state.qa[n - 1][2]
         st.success(f"Score: {fb['score']} / 5")
         st.write("Tips:")
         for t in fb["tips"]:
-            st.write("•", t)
-
+            st.write("•", t) 
 # ---------- SUMMARY ----------
 else:
     st.header("Session summary")
