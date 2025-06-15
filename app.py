@@ -5,6 +5,21 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 ROLES = ["Retail", "Fast-food", "Warehouse", "Office / Admin"]
 NUM_Q = 5
 MODEL = "gpt-3.5-turbo"
+# --- get a new question ---
+        try:
+            q = openai.ChatCompletion.create(
+                model=MODEL,
+                messages=[{
+                    "role": "system",
+                    "content": PROMPT_Q.format(role=st.session_state.role, n=n)
+                }]
+            ).choices[0].message.content.strip()
+        except Exception as e:
+            st.error(f"⚠️ OpenAI error: {e}")
+            st.stop()
+
+        st.session_state.qa.append([q, None, None])
+
 
 PROMPT_Q = """
 You are an HR interviewer for an ENTRY-LEVEL {role} position.
@@ -35,21 +50,6 @@ if st.session_state.role is None:
 elif st.session_state.step <= NUM_Q:
     n = st.session_state.step
           # --- get a new question ---
-        try:
-            q = openai.ChatCompletion.create(
-                model=MODEL,
-                messages=[{
-                    "role": "system",
-                    "content": PROMPT_Q.format(role=st.session_state.role, n=n)
-                }]
-            ).choices[0].message.content.strip()
-        except Exception as e:
-            st.error(f"⚠️ OpenAI error: {e}")
-            st.stop()
-
-        st.session_state.qa.append([q, None, None])
-
-
     q = st.session_state.qa[n-1][0]
     st.subheader(f"Question {n}/{NUM_Q}")
     st.write(q)
