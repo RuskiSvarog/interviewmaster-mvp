@@ -5,7 +5,8 @@ import openai, os, json
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 ROLES = ["Retail", "Fast-food", "Warehouse", "Office / Admin"]
 NUM_QUESTIONS = 5
-"MODEL = "gpt-3.5-turbo"
+MODEL = "gpt-3.5-turbo"
+ "gpt-3.5-turbo"
 "  # use "gpt-4o" if available
 
 PROMPT_Q = """
