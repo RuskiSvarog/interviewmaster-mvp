@@ -38,7 +38,7 @@ if st.session_state.role is None:
 elif st.session_state.step <= NUM_Q:
     n = st.session_state.step
 
-    # create question if needed
+    # Generate question if needed
     if len(st.session_state.qa) < n:
         try:
             q = openai.ChatCompletion.create(
@@ -52,7 +52,7 @@ elif st.session_state.step <= NUM_Q:
 
         st.session_state.qa.append([q, None, None])
 
-    # Only display question and answer box if the question has been generated
+    # Only access qa[n-1] if it exists!
     if len(st.session_state.qa) >= n:
         q = st.session_state.qa[n-1][0]
         st.subheader(f"Question {n}/{NUM_Q}")
@@ -75,13 +75,11 @@ elif st.session_state.step <= NUM_Q:
             st.session_state.step += 1
             st.experimental_rerun()
 
-        # show feedback if already answered
         if st.session_state.qa[n-1][2]:
             fb = st.session_state.qa[n-1][2]
             st.success(f"Score: {fb['score']} / 5")
             for t in fb["tips"]:
                 st.write("•", t)
-
 # ── SUMMARY ──────────────────────────────────────────
 else:
     st.header("Session summary")
