@@ -46,10 +46,10 @@ if st.session_state.role is None:
         st.experimental_rerun()
 
 # ---------- Q&A LOOP ----------
-n = st.session_state.step
-if len(st.session_state.qa) < n:
-    # --- get a new question
-    try:
+    n = st.session_state.step
+    if len(st.session_state.qa) < n:
+        # --- get a new question
+        try:
             q = openai.ChatCompletion.create(
                 model=MODEL,
                 messages=[{
