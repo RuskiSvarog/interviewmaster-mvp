@@ -50,12 +50,13 @@ elif st.session_state.step <= NUM_Q:
             st.error(f"⚠️ OpenAI error: {e}")
             st.stop()
         st.session_state.qa.append([q, None, None])
-        st.experimental_rerun()  # <--- force rerun after appending, so qa[n-1] is always safe
+        st.experimental_rerun()  # <--- force rerun after appending so qa[n-1] is always safe
 
-    # Only access qa[n-1] if it exists!
+    # Defensive: stop script if list not populated
     if len(st.session_state.qa) < n:
-        st.stop()  # Abort this run if the list isn't ready, avoid any IndexError
+        st.stop()
 
+    # Now it's safe to access qa[n-1]
     q = st.session_state.qa[n-1][0]
     st.subheader(f"Question {n}/{NUM_Q}")
     st.write(q)
