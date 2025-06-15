@@ -54,9 +54,9 @@ elif st.session_state.step <= NUM_Q:
         st.session_state.qa.append([q, None, None])
 
     # show question & answer box
-    q = st.session_state.qa[n-1][0]
-    st.subheader(f"Question {n}/{NUM_Q}")
-    st.write(q)
+q = st.session_state.qa[n-1][0]
+st.subheader(f"Question {n}/{NUM_Q}")
+st.write(q)
     ans = st.text_area("Your answer", key=f"ans{n}")
 
     if st.button("Submit", key=f"btn{n}") and ans.strip():
